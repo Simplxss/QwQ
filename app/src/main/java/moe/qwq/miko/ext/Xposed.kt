@@ -1,7 +1,6 @@
 package moe.qwq.miko.ext
 
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XC_MethodHook.MethodHookParam
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XCallback
 import moe.fuqiuluo.xposed.loader.LuoClassloader
@@ -10,7 +9,7 @@ import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
 
-internal typealias MethodHooker = (MethodHookParam) -> Unit
+internal typealias MethodHooker = (XC_MethodHook.MethodHookParam) -> Unit
 
 internal class XCHook {
     var before = nullableOf<MethodHooker>()

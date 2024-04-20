@@ -2,6 +2,8 @@ package moe.qwq.miko
 
 import android.content.Context
 import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -15,11 +17,21 @@ import mqq.app.MobileQQ
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
-class MainEntry: IXposedHookLoadPackage {
+
+var MODULE_PATH: String? = null;
+
+class MainEntry : IXposedHookZygoteInit, IXposedHookLoadPackage {
     private var firstStageInit = false
+
+    override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam) {
+        MODULE_PATH = startupParam.modulePath
+    }
 
     override fun handleLoadPackage(param: XC_LoadPackage.LoadPackageParam) {
         if (param.packageName == PACKAGE_NAME_QQ) {
+            val mPrefs = XSharedPreferences("moe.qwq.miko", param.packageName)
+            mPrefs.makeWorldReadable()
+
             entryQQ(param.classLoader)
         }
     }
@@ -61,7 +73,8 @@ class MainEntry: IXposedHookLoadPackage {
             }.forEach {
                 it.declaredFields.forEach { field ->
                     if ((field.type == HashMap::class.java || field.type == Map::class.java)
-                        && Modifier.isStatic(field.modifiers))
+                        && Modifier.isStatic(field.modifiers)
+                    )
                         fieldList.add(field)
                 }
             }
@@ -92,7 +105,7 @@ class MainEntry: IXposedHookLoadPackage {
         val classLoader = ctx.classLoader.also { requireNotNull(it) }
         LuoClassloader.hostClassLoader = classLoader
 
-        if(injectClassloader(MainEntry::class.java.classLoader)) {
+        if (injectClassloader(MainEntry::class.java.classLoader)) {
             if ("1" != System.getProperty("qwq_flag")) {
                 System.setProperty("qwq_flag", "1")
             } else return
@@ -101,15 +114,17 @@ class MainEntry: IXposedHookLoadPackage {
 
             secStaticStageInited = true
 
-            if(PlatformTools.isTim()) {
+            if (PlatformTools.isTim()) {
                 MMKVTools.initMMKV(ctx)
             }
 
-            ActionManager.runFirst(ctx, when {
-                PlatformTools.isMainProcess() -> ActionProcess.MAIN
-                PlatformTools.isMsfProcess() -> ActionProcess.MSF
-                else -> ActionProcess.ALL
-            })
+            ActionManager.runFirst(
+                ctx, when {
+                    PlatformTools.isMainProcess() -> ActionProcess.MAIN
+                    PlatformTools.isMsfProcess() -> ActionProcess.MSF
+                    else -> ActionProcess.ALL
+                }
+            )
         }
     }
 
@@ -148,7 +163,8 @@ class MainEntry: IXposedHookLoadPackage {
     }
 
     companion object {
-        @JvmStatic var secStaticStageInited = false
+        @JvmStatic
+        var secStaticStageInited = false
 
         internal const val PACKAGE_NAME_QQ = "com.tencent.mobileqq"
         internal const val PACKAGE_NAME_QQ_INTERNATIONAL = "com.tencent.mobileqqi"

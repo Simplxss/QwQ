@@ -13,13 +13,13 @@ import moe.qwq.miko.internals.setting.QwQSetting
 import mqq.app.MobileQQ
 import java.net.URL
 
-class WebJsBridge: IAction {
+class WebJsBridge : IAction {
     override fun invoke(ctx: Context) {
         val onLoad = afterHook {
             val web = it.thisObject as WebView
             val url = URL(web.url)
-            if (url.host == "qwq.qq.com" || url.host == "qwq.dev") {
-                web.loadUrl("http://${QwQSetting.settingUrl}")
+            if (arrayOf("qwq.qq.com", "qwq.dev").contains(url.host)) {
+                web.loadUrl(QwQSetting.settingUrl)
             } else if (url.host == QwQSetting.settingUrl.split(":")[0]) {
                 web.addJavascriptInterface(QwQJsBridge, "qwq")
             }

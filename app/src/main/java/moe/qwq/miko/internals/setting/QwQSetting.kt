@@ -68,12 +68,7 @@ object QwQSetting {
     var allowGroupFlashPic by settingMap[ALLOW_GROUP_FLASH_PIC] as Setting<Boolean>
 
     val settingUrl: String
-        get() = dataDir.resolve("domain").also {
-            if (!it.exists()) {
-                it.createNewFile()
-                it.writeText("qwq-web-setting.pages.dev")
-            }
-        }.readText()
+        get() = "file:///android_asset/qwq/setting/index.html"
 
     fun getSetting(key: String): Setting<*> {
         return settingMap[key] ?: Setting<Boolean>(key, SettingType.BOOLEAN)

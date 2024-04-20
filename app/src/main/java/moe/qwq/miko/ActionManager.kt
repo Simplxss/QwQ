@@ -1,18 +1,14 @@
 package moe.qwq.miko
 
 import android.content.Context
-import moe.qwq.miko.actions.ActionProcess
-import moe.qwq.miko.actions.Broadcast
+import moe.qwq.miko.actions.*
 import moe.qwq.miko.internals.hooks.BrowserAccessRestrictions
-import moe.qwq.miko.actions.FetchService
-import moe.qwq.miko.actions.IAction
-import moe.qwq.miko.actions.PacketHijacker
-import moe.qwq.miko.actions.WebJsBridge
 import moe.qwq.miko.internals.hooks.*
 
 object ActionManager {
     private val FIRST_ACTION = arrayOf(
         Broadcast::class.java,
+        AssertHijacker::class.java,
         WebJsBridge::class.java,
         FetchService::class.java,
         PacketHijacker::class.java,
